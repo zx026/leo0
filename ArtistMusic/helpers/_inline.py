@@ -257,7 +257,7 @@ class Inline:
             ],
             [
                 self.ikb(text="ʟᴀɴɢᴜᴀɢᴇ",  callback_data="help_langs"),
-                self.ikb(text="ᴅᴇᴠᴇʟᴏᴘᴇʀ", url="https://github.com/elevenyts/ArtistXMusic"),
+                self.ikb(text="ᴅᴇᴠᴇʟᴏᴘᴇʀ", url="https://t.me/l_Smoke_ll"),
             ],
         ]
         return self.ikm(rows)

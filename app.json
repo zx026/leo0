@@ -1,6 +1,6 @@
 {
-  "name": "ArtistMusic",
-  "description": "ArtistBots Telegram voice chat music bot",
+  "name": "Smoke Music",
+  "description": "Smoke Telegram voice chat music bot",
   "repository": "https://github.com/your-username/your-repo",
   "keywords": ["telegram", "music", "bot", "voice-chat"],
   "stack": "container",

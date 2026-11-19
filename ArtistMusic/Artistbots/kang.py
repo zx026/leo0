@@ -40,7 +40,7 @@ from ArtistMusic import app, db, logger
 
 PREFIXES = ["/", "!", "."]
 
-BRAND = "Artistbots"
+BRAND = "Smoke"
 MAX_STICKERS = 120          # Telegram limit per pack
 FIRST_BATCH = 50            # stickers sent with createStickerSet, rest via addStickerToSet
 ADD_DELAY = 1.0             # seconds between addStickerToSet calls (flood protection)

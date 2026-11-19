@@ -23,7 +23,7 @@
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                   ✦  ARTISTMUSIC MUSIC BOT  ✦
+                   ✦    SMOKE MUSIC BOT    ✦
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -46,7 +46,7 @@
 
 ## 〔 ✦ 〕 Overview
 
-> **ArtistMusic** is a next-generation Telegram Voice Chat Music Bot engineered for performance, stability, and scale.
+> **Smoke Music** is a next-generation Telegram Voice Chat Music Bot engineered for performance, stability, and scale.
 > Built on **Pyrogram** · **PyTgCalls** · **MongoDB** — delivering crystal-clear audio with powerful admin tooling, a full group-manager suite, member tagging, sticker-pack tools and multi-language support across global communities.
 
 <br>
@@ -147,7 +147,7 @@
 ✦ Fun Tags (GM / GN / Hi / Quotes)
 ✦ /kang — copy a whole sticker pack
 ✦ /sticker — pack from one sticker
-✦ Packs named "<You> by Artistbots"
+✦ Packs named "<You> by Smoke"
 ✦ Same pack or new pack prompt
 ```
 
@@ -432,7 +432,7 @@ Stop a running tag session.
 ```
 - `/kang` duplicates the **whole pack** of that sticker into a new pack owned by you.
 - `/sticker` makes a pack with **only that one sticker**. Run it again and the bot asks: **add to the same pack** or **create a new one**.
-- Pack title: **`<Your name> by Artistbots`** (`… 2`, `… 3` for later packs).
+- Pack title: **`<Your name> by Smoke`** (`… 2`, `… 3` for later packs).
 - A pack holds one type only (static / animated / video) and up to 120 stickers.
 
 </td>
