@@ -140,7 +140,7 @@ class Thumbnail:
     async def generate(self, song: Track, size=SIZE) -> str:
         try:
             temp = f"cache/temp_{song.id}.jpg"
-            output = f"cache/{song.id}_v2.png"
+            output = f"cache/{song.id}_v3.png"
             if os.path.exists(output):
                 return output
             await self.save_thumb(temp, song.thumbnail)
@@ -299,7 +299,7 @@ class Thumbnail:
                 y += 68
 
             # artist / channel
-            artist = _fit_text(draw, (song.channel_name or "Unknown Artist").strip(),
+            artist = _fit_text(draw, (song.channel_name or BRAND_TEXT).strip(),
                                self.artist_font if _is_latin(song.channel_name or "") else self.title_font_uni,
                                max_w)
             y += 6
