@@ -64,6 +64,12 @@ class Config:
         self.API_TIMEOUT: int = int(getenv("API_TIMEOUT", "60"))
         self.API_STREAM_TIMEOUT: int = int(getenv("API_STREAM_TIMEOUT", "300"))
 
+        # Second API (BabiesIQ) - used after ArtistBots API fails, before cookies
+        self.BABIES_API_URL: str = getenv("BABIES_API_URL", "https://api.babiesiq.tech/api")
+        self.BABIES_API_KEY: str = getenv("BABIES_API_KEY", "")
+        self.ENABLE_API2: bool = self._str_to_bool(getenv("ENABLE_API2", "True"))
+        self.BABIES_EQ: str = getenv("BABIES_EQ", "normal")
+
         # YouTube Cookies
         self.COOKIES_URL: List[str] = self._parse_cookies()
 
@@ -125,6 +131,8 @@ class Config:
         
         if self.ENABLE_API and not self.ARTISTBOTS_KEY:
             print("Warning: ENABLE_API is True but ARTISTBOTS_KEY is not set")
+        if self.ENABLE_API2 and not self.BABIES_API_KEY:
+            print("Warning: ENABLE_API2 is True but BABIES_API_KEY is not set (API 2 skipped)")
 
 
 config = Config()

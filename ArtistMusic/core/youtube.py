@@ -22,7 +22,7 @@ import yt_dlp
 import random
 import uuid
 import asyncio
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 import aiohttp
 from dataclasses import replace
 from pathlib import Path
@@ -412,6 +412,119 @@ class YouTube:
         except Exception as e:
             logger.error(f"❌ API download failed for {video_id}: {type(e).__name__}: {e}")
             return None
+
+    async def download_via_api2(self, video_id: str, video: bool = False) -> Optional[str]:
+        """
+        Download audio/video using the BabiesIQ API (second API).
+
+        Flow: GET {base}/song|video?query=<id>  ->  JSON {"stream": <url>}
+              then GET <stream url> -> media bytes.
+        The key is sent in the x-api-key header (not in the URL) and only to
+        the API's own host.
+        """
+        if not config.ENABLE_API2 or not config.BABIES_API_KEY or not config.BABIES_API_URL:
+            return None
+        if not self.is_yt_id(video_id):
+            logger.debug(f"API2: invalid video id {video_id!r}")
+            return None
+
+        os.makedirs("downloads", exist_ok=True)
+        file_ext = ".mp4" if video else ".mp3"
+        file_path = os.path.join("downloads", f"{video_id}{file_ext}")
+
+        if os.path.exists(file_path):
+            if self.is_bad_media_file(file_path):
+                try:
+                    os.remove(file_path)
+                except OSError:
+                    pass
+            else:
+                return file_path
+
+        base = config.BABIES_API_URL.rstrip("/")
+        api_host = urlparse(base).netloc
+        key_headers = {"x-api-key": config.BABIES_API_KEY}
+        endpoint = "video" if video else "song"
+        tmp_path = file_path + ".part"
+
+        try:
+            logger.info(f"🚀 [API 2] Trying BabiesIQ API for {video_id} ({endpoint})")
+            async with aiohttp.ClientSession() as session:
+                # Step 1: ask for the stream URL
+                async with session.get(
+                    f"{base}/{endpoint}",
+                    params={"query": video_id},
+                    headers=key_headers,
+                    timeout=aiohttp.ClientTimeout(total=self.api_timeout),
+                ) as resp:
+                    if resp.status != 200:
+                        body = (await resp.text())[:200]
+                        logger.error(f"API2 {endpoint} returned {resp.status}: {body}")
+                        return None
+                    data = await resp.json(content_type=None)
+
+                if not isinstance(data, dict):
+                    logger.error("API2: unexpected response format")
+                    return None
+                stream_url = (
+                    data.get("stream") or data.get("stream_url")
+                    or data.get("url") or data.get("link")
+                )
+                if not stream_url:
+                    logger.error(f"API2: no stream url in response keys={list(data.keys())}")
+                    return None
+
+                # Optional per-stream token and EQ preset
+                query = {}
+                if data.get("token") and "token=" not in stream_url:
+                    query["token"] = data["token"]
+                if config.BABIES_EQ and config.BABIES_EQ != "normal" and "eq=" not in stream_url:
+                    query["eq"] = config.BABIES_EQ
+                if query:
+                    stream_url += ("&" if "?" in stream_url else "?") + urlencode(query)
+
+                # Step 2: download the bytes (send the key only to the API host)
+                same_host = urlparse(stream_url).netloc == api_host
+                async with session.get(
+                    stream_url,
+                    headers=key_headers if same_host else None,
+                    timeout=aiohttp.ClientTimeout(total=self.api_stream_timeout),
+                ) as resp:
+                    if resp.status != 200:
+                        logger.error(f"API2 stream returned {resp.status}")
+                        return None
+                    ctype = (resp.headers.get("content-type") or "").lower()
+                    if any(t in ctype for t in ("json", "html", "text/")):
+                        logger.error(f"API2 stream sent non-media content ({ctype})")
+                        return None
+                    with open(tmp_path, "wb") as f:
+                        async for chunk in resp.content.iter_chunked(65536):
+                            f.write(chunk)
+
+            if not os.path.exists(tmp_path) or self.is_bad_media_file(tmp_path):
+                logger.error("API2: downloaded file is empty or not media")
+                return None
+            if os.path.exists(file_path):
+                return file_path
+            os.replace(tmp_path, file_path)
+            logger.info(f"✅ [API 2 SUCCESS] {file_path}")
+            return file_path
+
+        except asyncio.TimeoutError:
+            logger.error(f"⏰ API2 timeout for {video_id}")
+            return None
+        except aiohttp.ClientError as e:
+            logger.error(f"🌐 API2 client error for {video_id}: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"❌ API2 failed for {video_id}: {type(e).__name__}: {e}")
+            return None
+        finally:
+            if os.path.exists(tmp_path):
+                try:
+                    os.remove(tmp_path)
+                except OSError:
+                    pass
 
     async def download_via_cookies(self, video_id: str, video: bool = False) -> Optional[str]:
         """
@@ -970,9 +1083,19 @@ class YouTube:
             else:
                 logger.warning(f"⚠️ [API FAILED] {video_id}, trying cookies fallback...")
         
-        # Try cookies as fallback (Secondary)
+        # Try second API (BabiesIQ) if the first one failed / is not configured
+        if config.ENABLE_API2 and config.BABIES_API_KEY:
+            logger.info(f"🎯 [PRIORITY 2] Trying API 2 (BabiesIQ) for {video_id}")
+            result = await self.download_via_api2(video_id, video=video)
+            if result:
+                logger.info(f"✅ [SUCCESS] Downloaded via API 2: {video_id}")
+                asyncio.create_task(self.cache_to_logger(video_id, result, video=video))
+                return result
+            logger.warning(f"⚠️ [API 2 FAILED] {video_id}, trying cookies fallback...")
+
+        # Try cookies as fallback (Last resort)
         if self.enable_cookies_fallback:
-            logger.info(f"🍪 [PRIORITY 2] Trying cookies download for {video_id}")
+            logger.info(f"🍪 [PRIORITY 3] Trying cookies download for {video_id}")
             result = await self.download_via_cookies(video_id, video=video)
             
             if result:
