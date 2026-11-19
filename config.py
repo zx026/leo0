@@ -23,14 +23,14 @@ load_dotenv()
 class Config:
     def __init__(self):
         # Telegram API
-        self.API_ID: int = int(getenv("API_ID", "29308061"))
-        self.API_HASH: str = getenv("API_HASH", "462de3dfc98fd938ef9c6ee31a72d099")
+        self.API_ID: int = int(getenv("API_ID", "0"))
+        self.API_HASH: str = getenv("API_HASH", "")
         self.BOT_TOKEN: str = getenv("BOT_TOKEN", "")
         self.LOGGER_ID: int = int(getenv("LOGGER_ID", "0"))
         self.OWNER_ID: int = int(getenv("OWNER_ID", "0"))
 
         # Database
-        self.MONGO_URL: str = getenv("MONGO_DB_URI", "mongodb+srv://Elevenyts:Elevenyts@cluster0.vuyc1u2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+        self.MONGO_URL: str = getenv("MONGO_DB_URI", "")
 
         # Limits
         self.DURATION_LIMIT: int = int(getenv("DURATION_LIMIT", "300")) * 60
@@ -45,6 +45,12 @@ class Config:
         # Support Links
         self.SUPPORT_CHANNEL: str = getenv("SUPPORT_CHANNEL", "https://t.me/Leo000079")
         self.SUPPORT_CHAT: str = getenv("SUPPORT_CHAT", "https://t.me/Leo000079")
+
+        # Chats/channels the assistant accounts should join on boot (space separated
+        # usernames, e.g. "mychannel mygroup"). Empty = join nothing.
+        self.ASSISTANT_JOIN_CHATS: List[str] = [
+            c.strip().lstrip("@") for c in getenv("ASSISTANT_JOIN_CHATS", "").split() if c.strip()
+        ]
 
         # Excluded Chats
         self.EXCLUDED_CHATS: List[int] = self._parse_excluded_chats()

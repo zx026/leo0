@@ -143,11 +143,12 @@ async def _update(_, m: types.Message):
         import subprocess
         
         # Pull latest changes
-        result = subprocess.run(
+        result = await asyncio.to_thread(
+            subprocess.run,
             ["git", "pull"],
             capture_output=True,
             text=True,
-            cwd=os.getcwd()
+            cwd=os.getcwd(),
         )
         
         if result.returncode != 0:
@@ -171,11 +172,18 @@ async def _update(_, m: types.Message):
             "<blockquote>Updating Python packages...</blockquote>"
         )
         
-        pip_result = subprocess.run(
+        pip_result = await asyncio.to_thread(
+            subprocess.run,
             [sys.executable, "-m", "pip", "install", "-r", "requirements.txt", "--upgrade"],
             capture_output=True,
-            text=True
+            text=True,
         )
+        if pip_result.returncode != 0:
+            return await sent.edit_text(
+                "<blockquote><b>❌ Dependency install failed</b></blockquote>\n\n"
+                f"<blockquote>{pip_result.stderr[-500:]}</blockquote>\n"
+                "<blockquote>Bot was NOT restarted. Fix the error and run /update again.</blockquote>"
+            )
         
         # Clear cache and restart
         await sent.edit_text(

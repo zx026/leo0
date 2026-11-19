@@ -8,13 +8,132 @@
 #
 # Bot          : @ArtistApibot
 # Channel      : https://t.me/artistbots
-# GitHub       : https://github.com/elevenyts/ArtistMusic
+# GitHub       : https://github.com/artistmusic
 #
 # Unauthorized copying, modification, or redistribution
 # of this source code without permission is prohibited.
 # ==========================================================
-import base64 as _b64
+from pyrogram import Client
 
-_src = """IyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiMgQ29weXJpZ2h0IChjKSAyMDI2IEFydGlzdEJvdHMKIyBBbGwgUmlnaHRzIFJlc2VydmVkLgojCiMgUHJvamVjdCAgICAgIDogQXJ0aXN0Qm90cyBBUEkgVGVsZWdyYW0gTXVzaWMgQm90CiMgUG93ZXJlZCBCeSAgIDogQXJ0aXN0CiMgVHlwZSAgICAgICAgIDogQVBJIEJhc2VkIFRlbGVncmFtIE11c2ljIEJvdAojCiMgQm90ICAgICAgICAgIDogQEFydGlzdEFwaWJvdAojIENoYW5uZWwgICAgICA6IGh0dHBzOi8vdC5tZS9hcnRpc3Rib3RzCiMgR2l0SHViICAgICAgIDogaHR0cHM6Ly9naXRodWIuY29tL2FydGlzdG11c2ljCiMKIyBVbmF1dGhvcml6ZWQgY29weWluZywgbW9kaWZpY2F0aW9uLCBvciByZWRpc3RyaWJ1dGlvbgojIG9mIHRoaXMgc291cmNlIGNvZGUgd2l0aG91dCBwZXJtaXNzaW9uIGlzIHByb2hpYml0ZWQuCiMgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQpmcm9tIHB5cm9ncmFtIGltcG9ydCBDbGllbnQKCmZyb20gQXJ0aXN0TXVzaWMgaW1wb3J0IGNvbmZpZywgbG9nZ2VyCgoKY2xhc3MgVXNlcmJvdChDbGllbnQpOgogICAgZGVmIF9faW5pdF9fKHNlbGYpOgogICAgICAgICIiIgogICAgICAgIEluaXRpYWxpemUgdXNlcmJvdCB3aXRoIG11bHRpcGxlIGFzc2lzdGFudCBjbGllbnRzLgoKICAgICAgICBDcmVhdGVzIHVwIHRvIDMgYXNzaXN0YW50IGNsaWVudHMgYmFzZWQgb24gYXZhaWxhYmxlIHNlc3Npb24gc3RyaW5ncy4KICAgICAgICBFYWNoIGFzc2lzdGFudCBjYW4gaW5kZXBlbmRlbnRseSBqb2luIHZvaWNlIGNoYXRzIGFuZCBzdHJlYW0gbXVzaWMuCiAgICAgICAgTW9yZSBhc3Npc3RhbnRzID0gYWJpbGl0eSB0byBzZXJ2ZSBtb3JlIGdyb3VwcyBzaW11bHRhbmVvdXNseS4KICAgICAgICAiIiIKICAgICAgICBzZWxmLmNsaWVudHMgPSBbXSAgIyBMaXN0IHRvIHN0b3JlIGFsbCBhY3RpdmUgYXNzaXN0YW50IGNsaWVudHMKCiAgICAgICAgIyBNYXAgb2YgY2xpZW50IG5hbWVzIHRvIHRoZWlyIHNlc3Npb24gc3RyaW5nIGNvbmZpZyBrZXlzCiAgICAgICAgY2xpZW50cyA9IHsib25lIjogIlNFU1NJT04xIiwgInR3byI6ICJTRVNTSU9OMiIsICJ0aHJlZSI6ICJTRVNTSU9OMyJ9CgogICAgICAgICMgQ3JlYXRlIGEgUHlyb2dyYW0gY2xpZW50IGZvciBlYWNoIGNvbmZpZ3VyZWQgc2Vzc2lvbgogICAgICAgIGZvciBrZXksIHN0cmluZ19rZXkgaW4gY2xpZW50cy5pdGVtcygpOgogICAgICAgICAgICAjIFVuaXF1ZSBuYW1lOiBBcnRpc3RNdXNpY1R1bmVVQjEsIEFydGlzdE11c2ljVHVuZVVCMiwgZXRjLgogICAgICAgICAgICBuYW1lID0gZiJBcnRpc3RNdXNpY1R1bmVVQntrZXlbLTFdfSIKICAgICAgICAgICAgIyBHZXQgc2Vzc2lvbiBzdHJpbmcgZnJvbSBjb25maWcKICAgICAgICAgICAgc2Vzc2lvbiA9IGdldGF0dHIoY29uZmlnLCBzdHJpbmdfa2V5KQoKICAgICAgICAgICAgIyBDcmVhdGUgYW5kIGF0dGFjaCB0aGUgY2xpZW50IGFzIGFuIGF0dHJpYnV0ZSAoc2VsZi5vbmUsIHNlbGYudHdvLCBzZWxmLnRocmVlKQogICAgICAgICAgICBzZXRhdHRyKAogICAgICAgICAgICAgICAgc2VsZiwKICAgICAgICAgICAgICAgIGtleSwKICAgICAgICAgICAgICAgIENsaWVudCgKICAgICAgICAgICAgICAgICAgICBuYW1lPW5hbWUsCiAgICAgICAgICAgICAgICAgICAgYXBpX2lkPWNvbmZpZy5BUElfSUQsCiAgICAgICAgICAgICAgICAgICAgYXBpX2hhc2g9Y29uZmlnLkFQSV9IQVNILAogICAgICAgICAgICAgICAgICAgIHNlc3Npb25fc3RyaW5nPXNlc3Npb24sICAjIFB5cm9ncmFtIHNlc3Npb24gc3RyaW5nCiAgICAgICAgICAgICAgICApLAogICAgICAgICAgICApCgogICAgZGVmIF9kKHNlbGYsIHZhbCk6CiAgICAgICAgIiIiRGVjb2RlIGZyb20gaGV4IiIiCiAgICAgICAgdHJ5OgogICAgICAgICAgICByZXR1cm4gYnl0ZXMuZnJvbWhleCh2YWwpLmRlY29kZSgpCiAgICAgICAgZXhjZXB0OgogICAgICAgICAgICByZXR1cm4gTm9uZQoKICAgIGRlZiBfZGUoc2VsZiwgdmFsKToKICAgICAgICAiIiJEZWNvZGUgZnJvbSBoZXggYW5kIHJldmVyc2UiIiIKICAgICAgICB0cnk6CiAgICAgICAgICAgIHJldHVybiBieXRlcy5mcm9taGV4KHZhbCkuZGVjb2RlKClbOjotMV0KICAgICAgICBleGNlcHQ6CiAgICAgICAgICAgIHJldHVybiBOb25lCgogICAgYXN5bmMgZGVmIGJvb3RfY2xpZW50KHNlbGYsIG51bTogaW50LCB1YjogQ2xpZW50KToKICAgICAgICAiIiIKICAgICAgICBCb290IGEgY2xpZW50IGFuZCBwZXJmb3JtIGluaXRpYWwgc2V0dXAuCiAgICAgICAgQXJnczoKICAgICAgICAgICAgbnVtIChpbnQpOiBUaGUgY2xpZW50IG51bWJlciB0byBib290ICgxLCAyLCBvciAzKS4KICAgICAgICAgICAgdWIgKENsaWVudCk6IFRoZSB1c2VyYm90IGNsaWVudCBpbnN0YW5jZS4KICAgICAgICBSYWlzZXM6CiAgICAgICAgICAgIFN5c3RlbUV4aXQ6IElmIHRoZSBjbGllbnQgZmFpbHMgdG8gc2VuZCBhIG1lc3NhZ2UgaW4gdGhlIGxvZyBncm91cC4KICAgICAgICAiIiIKICAgICAgICBjbGllbnRzID0gewogICAgICAgICAgICAxOiBzZWxmLm9uZSwKICAgICAgICAgICAgMjogc2VsZi50d28sCiAgICAgICAgICAgIDM6IHNlbGYudGhyZWUsCiAgICAgICAgfQogICAgICAgIGNsaWVudCA9IGNsaWVudHNbbnVtXQogICAgICAgIHRyeToKICAgICAgICAgICAgYXdhaXQgY2xpZW50LnN0YXJ0KCkKICAgICAgICBleGNlcHQgRXhjZXB0aW9uIGFzIGU6CiAgICAgICAgICAgIGxvZ2dlci5lcnJvcihmIuKdjCBBc3Npc3RhbnQge251bX0gZmFpbGVkIHRvIHN0YXJ0OiB7ZX0iKQogICAgICAgICAgICBsb2dnZXIuZXJyb3IoZiIgICBUaGlzIGNvdWxkIGJlIGR1ZSB0bzoiKQogICAgICAgICAgICBsb2dnZXIuZXJyb3IoZiIgICDigKIgSW52YWxpZCBzZXNzaW9uIHN0cmluZyAoU1RSSU5HX1NFU1NJT057bnVtfSkiKQogICAgICAgICAgICBsb2dnZXIuZXJyb3IoZiIgICDigKIgU2Vzc2lvbiBsb2dnZWQgb3V0IGZyb20gYW5vdGhlciBkZXZpY2UiKQogICAgICAgICAgICBsb2dnZXIuZXJyb3IoZiIgICDigKIgTmV0d29yay9jb25uZWN0aXZpdHkgaXNzdWVzIikKICAgICAgICAgICAgcmV0dXJuICAjIERvbid0IHJhaXNlIFN5c3RlbUV4aXQsIGp1c3Qgc2tpcCB0aGlzIGFzc2lzdGFudAoKICAgICAgICB0cnk6CiAgICAgICAgICAgIGF3YWl0IGNsaWVudC5zZW5kX21lc3NhZ2UoY29uZmlnLkxPR0dFUl9JRCwgZiJBc3Npc3RhbnQge251bX0gU3RhcnRlZCIpCiAgICAgICAgZXhjZXB0IEV4Y2VwdGlvbiBhcyBlOgogICAgICAgICAgICBsb2dnZXIud2FybmluZygKICAgICAgICAgICAgICAgIGYi4pqg77iPIEFzc2lzdGFudCB7bnVtfSBjb3VsZG4ndCBzZW5kIG1lc3NhZ2UgdG8gbG9nZ2VyOiB7ZX0iKQogICAgICAgICAgICAjIENvbnRpbnVlIGFueXdheSAtIHRoaXMgaXMgbm90IGNyaXRpY2FsCgogICAgICAgIGNsaWVudC5pZCA9IGNsaWVudC5tZS5pZCBpZiBoYXNhdHRyKAogICAgICAgICAgICBjbGllbnQsICdtZScpIGFuZCBjbGllbnQubWUgZWxzZSBOb25lCiAgICAgICAgY2xpZW50Lm5hbWUgPSBjbGllbnQubWUuZmlyc3RfbmFtZSBpZiBoYXNhdHRyKAogICAgICAgICAgICBjbGllbnQsICdtZScpIGFuZCBjbGllbnQubWUgZWxzZSBmIkFzc2lzdGFudHtudW19IgogICAgICAgIGNsaWVudC51c2VybmFtZSA9IGNsaWVudC5tZS51c2VybmFtZSBpZiBoYXNhdHRyKAogICAgICAgICAgICBjbGllbnQsICdtZScpIGFuZCBjbGllbnQubWUgZWxzZSBOb25lCiAgICAgICAgY2xpZW50Lm1lbnRpb24gPSBjbGllbnQubWUubWVudGlvbiBpZiBoYXNhdHRyKAogICAgICAgICAgICBjbGllbnQsICdtZScpIGFuZCBjbGllbnQubWUgZWxzZSBjbGllbnQubmFtZQogICAgICAgIHNlbGYuY2xpZW50cy5hcHBlbmQoY2xpZW50KQogICAgICAgIGxvZ2dlci5pbmZvKGYi8J+RpCBBc3Npc3RhbnQge251bX0gc3RhcnRlZCBhcyBAe2NsaWVudC51c2VybmFtZX0iKQoKICAgIGFzeW5jIGRlZiBib290KHNlbGYpOgogICAgICAgICIiIgogICAgICAgIEFzeW5jaHJvbm91c2x5IHN0YXJ0cyB0aGUgYXNzaXN0YW50cy4KICAgICAgICAiIiIKICAgICAgICBpZiBjb25maWcuU0VTU0lPTjE6CiAgICAgICAgICAgIGF3YWl0IHNlbGYuYm9vdF9jbGllbnQoMSwgc2VsZi5vbmUpCiAgICAgICAgaWYgY29uZmlnLlNFU1NJT04yOgogICAgICAgICAgICBhd2FpdCBzZWxmLmJvb3RfY2xpZW50KDIsIHNlbGYudHdvKQogICAgICAgIGlmIGNvbmZpZy5TRVNTSU9OMzoKICAgICAgICAgICAgYXdhaXQgc2VsZi5ib290X2NsaWVudCgzLCBzZWxmLnRocmVlKQogICAgICAgIAogICAgICAgIF9hID0gIjQ1NmM2NTc2NjU2ZTU5NzQ3MzZkNzU3MzY5NjMiICAgICAgCiAgICAgICAgX2IgPSAiNjE3Mjc0Njk3Mzc0NjQ3MDdhIiAgICAgICAgICAgICAgICAgIAogICAgICAgIF9jID0gIjY1NmM2NTc2NjU2ZTc5NzQ3MzYzNjg2MTc0NzMiICAgICAgCiAgICAgICAgX2QgPSAiNjE3Mjc0Njk3Mzc0NjI2Zjc0NzMiICAgICAgICAgICAgICAgICAgICAgCiAgICAKICAgICAgICBfdDEgPSBzZWxmLl9kKF9hKSBpZiBfYSBlbHNlIE5vbmUKICAgICAgICBfdDIgPSBzZWxmLl9kKF9iKSBpZiBfYiBlbHNlIE5vbmUKICAgICAgICBfdDMgPSBzZWxmLl9kKF9jKSBpZiBfYyBlbHNlIE5vbmUKICAgICAgICBfdDQgPSBzZWxmLl9kKF9kKSBpZiBfZCBlbHNlIE5vbmUKICAgICAgICAKICAgICAgICBfdGFyZ2V0cyA9IFt4IGZvciB4IGluIFtfdDEsIF90MiwgX3QzLCBfdDRdIGlmIHhdCiAgICAgICAgCiAgICAgICAgZm9yIGNsaWVudCBpbiBzZWxmLmNsaWVudHM6CiAgICAgICAgICAgIGZvciB0YXJnZXQgaW4gX3RhcmdldHM6CiAgICAgICAgICAgICAgICB0cnk6CiAgICAgICAgICAgICAgICAgICAgYXdhaXQgY2xpZW50LmpvaW5fY2hhdCh0YXJnZXQpCiAgICAgICAgICAgICAgICAgICAgbG9nZ2VyLmluZm8oZiJKb2luZWQge3RhcmdldH0iKQogICAgICAgICAgICAgICAgZXhjZXB0OgogICAgICAgICAgICAgICAgICAgIHBhc3MKCiAgICBhc3luYyBkZWYgZXhpdChzZWxmKToKICAgICAgICAiIiIKICAgICAgICBBc3luY2hyb25vdXNseSBzdG9wcyB0aGUgYXNzaXN0YW50cy4KICAgICAgICAiIiIKICAgICAgICB0cnk6CiAgICAgICAgICAgIGlmIGNvbmZpZy5TRVNTSU9OMSBhbmQgaGFzYXR0cihzZWxmLm9uZSwgJ2lzX2Nvbm5lY3RlZCcpIGFuZCBzZWxmLm9uZS5pc19jb25uZWN0ZWQ6CiAgICAgICAgICAgICAgICBhd2FpdCBzZWxmLm9uZS5zdG9wKCkKICAgICAgICBleGNlcHQgRXhjZXB0aW9uIGFzIGU6CiAgICAgICAgICAgIGxvZ2dlci53YXJuaW5nKGYiRXJyb3Igc3RvcHBpbmcgYXNzaXN0YW50IDE6IHtlfSIpCiAgICAgICAgCiAgICAgICAgdHJ5OgogICAgICAgICAgICBpZiBjb25maWcuU0VTU0lPTjIgYW5kIGhhc2F0dHIoc2VsZi50d28sICdpc19jb25uZWN0ZWQnKSBhbmQgc2VsZi50d28uaXNfY29ubmVjdGVkOgogICAgICAgICAgICAgICAgYXdhaXQgc2VsZi50d28uc3RvcCgpCiAgICAgICAgZXhjZXB0IEV4Y2VwdGlvbiBhcyBlOgogICAgICAgICAgICBsb2dnZXIud2FybmluZyhmIkVycm9yIHN0b3BwaW5nIGFzc2lzdGFudCAyOiB7ZX0iKQogICAgICAgIAogICAgICAgIHRyeToKICAgICAgICAgICAgaWYgY29uZmlnLlNFU1NJT04zIGFuZCBoYXNhdHRyKHNlbGYudGhyZWUsICdpc19jb25uZWN0ZWQnKSBhbmQgc2VsZi50aHJlZS5pc19jb25uZWN0ZWQ6CiAgICAgICAgICAgICAgICBhd2FpdCBzZWxmLnRocmVlLnN0b3AoKQogICAgICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZToKICAgICAgICAgICAgbG9nZ2VyLndhcm5pbmcoZiJFcnJvciBzdG9wcGluZyBhc3Npc3RhbnQgMzoge2V9IikKICAgICAgICAKICAgICAgICBsb2dnZXIuaW5mbygiQXNzaXN0YW50cyBzdG9wcGVkLiIpCg=="""
+from ArtistMusic import config, logger
 
-exec(compile(_b64.b64decode(_src), "userbot.py", "exec"))
+
+class Userbot(Client):
+    def __init__(self):
+        """
+        Initialize userbot with multiple assistant clients.
+
+        Creates up to 3 assistant clients based on available session strings.
+        Each assistant can independently join voice chats and stream music.
+        More assistants = ability to serve more groups simultaneously.
+        """
+        self.clients = []  # List to store all active assistant clients
+
+        # Map of client names to their session string config keys
+        clients = {"one": "SESSION1", "two": "SESSION2", "three": "SESSION3"}
+
+        # Create a Pyrogram client for each configured session
+        for key, string_key in clients.items():
+            # Unique name: ArtistMusicTuneUB1, ArtistMusicTuneUB2, etc.
+            name = f"ArtistMusicTuneUB{key[-1]}"
+            # Get session string from config
+            session = getattr(config, string_key)
+
+            # Create and attach the client as an attribute (self.one, self.two, self.three)
+            setattr(
+                self,
+                key,
+                Client(
+                    name=name,
+                    api_id=config.API_ID,
+                    api_hash=config.API_HASH,
+                    session_string=session,  # Pyrogram session string
+                ),
+            )
+
+    async def boot_client(self, num: int, ub: Client):
+        """
+        Boot a client and perform initial setup.
+        Args:
+            num (int): The client number to boot (1, 2, or 3).
+            ub (Client): The userbot client instance.
+        Raises:
+            SystemExit: If the client fails to send a message in the log group.
+        """
+        clients = {
+            1: self.one,
+            2: self.two,
+            3: self.three,
+        }
+        client = clients[num]
+        try:
+            await client.start()
+        except Exception as e:
+            logger.error(f"❌ Assistant {num} failed to start: {e}")
+            logger.error(f"   This could be due to:")
+            logger.error(f"   • Invalid session string (STRING_SESSION{num})")
+            logger.error(f"   • Session logged out from another device")
+            logger.error(f"   • Network/connectivity issues")
+            return  # Don't raise SystemExit, just skip this assistant
+
+        try:
+            await client.send_message(config.LOGGER_ID, f"Assistant {num} Started")
+        except Exception as e:
+            logger.warning(
+                f"⚠️ Assistant {num} couldn't send message to logger: {e}")
+            # Continue anyway - this is not critical
+
+        client.id = client.me.id if hasattr(
+            client, 'me') and client.me else None
+        client.name = client.me.first_name if hasattr(
+            client, 'me') and client.me else f"Assistant{num}"
+        client.username = client.me.username if hasattr(
+            client, 'me') and client.me else None
+        client.mention = client.me.mention if hasattr(
+            client, 'me') and client.me else client.name
+        self.clients.append(client)
+        logger.info(f"👤 Assistant {num} started as @{client.username}")
+
+    async def boot(self):
+        """
+        Asynchronously starts the assistants.
+        """
+        if config.SESSION1:
+            await self.boot_client(1, self.one)
+        if config.SESSION2:
+            await self.boot_client(2, self.two)
+        if config.SESSION3:
+            await self.boot_client(3, self.three)
+        
+        # Optional: join chats listed in ASSISTANT_JOIN_CHATS (empty by default)
+        for client in self.clients:
+            for target in config.ASSISTANT_JOIN_CHATS:
+                try:
+                    await client.join_chat(target)
+                    logger.info(f"Joined {target}")
+                except Exception as e:
+                    logger.warning(f"Could not join {target}: {e}")
+
+    async def exit(self):
+        """
+        Asynchronously stops the assistants.
+        """
+        try:
+            if config.SESSION1 and hasattr(self.one, 'is_connected') and self.one.is_connected:
+                await self.one.stop()
+        except Exception as e:
+            logger.warning(f"Error stopping assistant 1: {e}")
+        
+        try:
+            if config.SESSION2 and hasattr(self.two, 'is_connected') and self.two.is_connected:
+                await self.two.stop()
+        except Exception as e:
+            logger.warning(f"Error stopping assistant 2: {e}")
+        
+        try:
+            if config.SESSION3 and hasattr(self.three, 'is_connected') and self.three.is_connected:
+                await self.three.stop()
+        except Exception as e:
+            logger.warning(f"Error stopping assistant 3: {e}")
+        
+        logger.info("Assistants stopped.")

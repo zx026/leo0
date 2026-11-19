@@ -78,10 +78,6 @@ from ArtistMusic.core.youtube import YouTube
 tg = Telegram()
 yt = YouTube()
 
-# Initialize preload manager for background track downloading
-from ArtistMusic.core.preload import PreloadManager
-preload = PreloadManager()
-
 # Initialize queue manager
 from ArtistMusic.helpers import Queue
 queue = Queue()
