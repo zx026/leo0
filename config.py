@@ -29,6 +29,10 @@ class Config:
         self.LOGGER_ID: int = int(getenv("LOGGER_ID", "0"))
         self.OWNER_ID: int = int(getenv("OWNER_ID", "0"))
 
+        # Group/channel where played songs are stored (cache). Bot must be admin there.
+        # 0 / not set = use LOGGER_ID.
+        self.SONG_STORE_ID: int = int(getenv("SONG_STORE_ID", "0")) or self.LOGGER_ID
+
         # Database
         self.MONGO_URL: str = getenv("MONGO_DB_URI", "")
 

@@ -830,7 +830,7 @@ class YouTube:
         Returns:
             Path to the downloaded file, or None if there's no valid cache.
         """
-        if not config.LOGGER_ID:
+        if not config.SONG_STORE_ID:
             return None
 
         cached = await db.get_song_cache(video_id, video=video)
@@ -885,7 +885,7 @@ class YouTube:
         if message_id:
             try:
                 logger.info(f"⚡ [CACHE] Trying message_id fallback for {video_id}...")
-                msg = await app.get_messages(config.LOGGER_ID, message_id)
+                msg = await app.get_messages(config.SONG_STORE_ID, message_id)
                 if msg and not msg.empty:
                     media_obj = msg.audio or msg.video or msg.document or msg.voice
                     if media_obj:
@@ -923,7 +923,7 @@ class YouTube:
 
         Runs as a fire-and-forget background task so it never delays playback.
         """
-        if not config.LOGGER_ID:
+        if not config.SONG_STORE_ID:
             return
 
         # Same track ka upload already chal raha ho toh dobara mat karo
@@ -945,14 +945,14 @@ class YouTube:
             caption = f"🎵 <b>Cached Track</b>\n\n<b>ID:</b> <code>{video_id}</code>"
             if video:
                 sent = await app.send_video(
-                    chat_id=config.LOGGER_ID,
+                    chat_id=config.SONG_STORE_ID,
                     video=file_path,
                     caption=caption,
                     disable_notification=True,
                 )
             else:
                 sent = await app.send_audio(
-                    chat_id=config.LOGGER_ID,
+                    chat_id=config.SONG_STORE_ID,
                     audio=file_path,
                     caption=caption,
                     disable_notification=True,

@@ -122,6 +122,17 @@ class Bot(pyrogram.Client):
                 f"ᴘʟᴇᴀꜱᴇ ᴘʀᴏᴍᴏᴛᴇ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴀᴅᴍɪɴɪꜱᴛʀᴀᴛᴏʀ ᴡɪᴛʜ ɴᴇᴄᴇꜱꜱᴀʀʏ ᴘᴇʀᴍɪꜱꜱɪᴏɴꜱ."
             )
 
+        # Optional dedicated song-storage group: warn (don't crash) if bot can't use it
+        if config.SONG_STORE_ID and config.SONG_STORE_ID != self.logger:
+            try:
+                store_member = await self.get_chat_member(config.SONG_STORE_ID, self.id)
+                if store_member.status != pyrogram.enums.ChatMemberStatus.ADMINISTRATOR:
+                    logger.warning(f"⚠️ Bot is not admin in SONG_STORE_ID {config.SONG_STORE_ID}: song caching may fail")
+                else:
+                    logger.info(f"💾 Song storage group ready: {config.SONG_STORE_ID}")
+            except Exception as ex:
+                logger.warning(f"⚠️ Cannot access SONG_STORE_ID {config.SONG_STORE_ID}: {ex}")
+
         logger.info(f"🤖 Bot started successfully as @{self.username}")
 
     async def exit(self) -> None:
